@@ -158,3 +158,50 @@ export const getFeed = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+export const replyToTweet = async (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).json({ message: 'Please provide tweet ID' });
+    }
+
+    const { content } = req.body;
+    if (!content) {
+        return res.status(400).json({ message: 'Please provide content' });
+    }
+
+    // Get the User ID from the token
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = decodeToken(token);
+    const author = await User.findById(decodedToken.id);
+
+    // Parse content
+    let hashtags = [];
+    let mentions = [];
+
+    const words = content.split(' ');
+    words.forEach(async word => {
+        console.log(word);
+        if (word.startsWith('#')) {
+            hashtags.push(word.slice(1));
+        } else if (word.startsWith('@')) {
+            console.log('mention', word);
+            let userMentionned = await User.findOne({ username: word.slice(1) });
+            if (userMentionned) {
+                mentions.push(userMentionned._id);
+            }
+        }   
+    });
+
+    try {
+        const tweet = await Tweet.create({
+            "content": content,
+            "author": author._id,
+            "replyTo": req.params.id,
+            "hashtags": hashtags,
+            "mentions": mentions
+        });
+        return res.status(201).json(tweet);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
