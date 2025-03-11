@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import HomePage from './pages/Home/HomePage';
 import LoginPage from './pages/Login/LoginPage';
 import SignUpPage from './pages/SignUp/SignUpPage';
+import NotificationsPage from './pages/Notifications/NotificationsPage'; // Import de la page Notifications
+import ProfilePage from './pages/Profile/ProfilePage'; // Import de la page Profil
 import './App.css';
 
 function App() {
@@ -16,33 +18,40 @@ function App() {
             <input type="text" placeholder="Rechercher sur Tweeter" />
           </div>
           <div className="user-menu">
-            <img src="https://via.placeholder.com/40" alt="User" />
-            {/* Le lien vers la page d'inscription */}
+            <Link to="/login">
+              <button className="login-button">Connexion</button>
+            </Link>
             <Link to="/signup">
-              <button className="signup-button">
-                S'inscrire
-              </button>
+              <button className="signup-button">S'inscrire</button>
             </Link>
           </div>
         </header>
         <main className="app-content">
           <nav className="main-nav">
             <ul>
-              <li className="active"><i className="fa fa-home"></i> Accueil</li>
-              <li><i className="fa fa-bell"></i> Notifications</li>
-              <li><i className="fa fa-envelope"></i> Messages</li>
+              <li className="active">
+                <Link to="/" className="nav-link"><i className="fa fa-home"></i> Accueil</Link>
+              </li>
+              <li>
+                {/* Lien vers Notifications */}
+                <Link to="/notifications" className="nav-link"><i className="fa fa-bell"></i> Notifications</Link>
+              </li>
               <li><i className="fa fa-bookmark"></i> Signets</li>
-              <li><i className="fa fa-user"></i> Profil</li>
+              <li>
+                {/* Lien vers Profil */}
+                <Link to="/profile" className="nav-link"><i className="fa fa-user"></i> Profil</Link>
+              </li>
             </ul>
           </nav>
           <div className="main-content">
             <Routes>
-              {/* Page d'accueil */}
               <Route path="/" element={<HomePage />} />
-              {/* Page de connexion */}
               <Route path="/login" element={<LoginPage />} />
-              {/* Page d'inscription */}
               <Route path="/signup" element={<SignUpPage />} />
+              {/* Route pour la page Notifications */}
+              <Route path="/notifications" element={<NotificationsPage />} />
+              {/* Route pour la page Profil */}
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </div>
         </main>

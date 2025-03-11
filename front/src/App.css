@@ -92,3 +92,39 @@ body {
 .main-content {
   flex: 1;
 }
+
+/* Nouveau style pour les boutons "Connexion" et "S'inscrire" */
+.user-menu {
+  display: flex;
+  align-items: center;
+}
+
+.login-button,
+.signup-button {
+  padding: 8px 16px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.login-button {
+  background-color: #1DA1F2;
+  color: white;
+}
+
+.login-button:hover {
+  background-color: #0d8dd6;
+}
+
+.signup-button {
+  background-color: #00AC66;
+  color: white;
+}
+
+.signup-button:hover {
+  background-color: #008c52;
+}

@@ -1,0 +1,50 @@
+/* NotificationsPage.css */
+
+/* Général */
+.notifications-page {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.notifications-page h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+  color: #1da1f2;
+  font-weight: bold;
+}
+
+/* Liste des notifications */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Carte de notification */
+.notification-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e6ecf0;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.notification-card:hover {
+  background-color: #f5f8fa;
+  transform: translateY(-5px);
+}
+
+/* Texte de notification */
+.notification-text {
+  font-size: 1.1em;
+  color: #14171a;
+  margin-bottom: 8px;
+}
+
+/* Heure de notification */
+.notification-time {
+  font-size: 0.9em;
+  color: #657786;
+  text-align: right;
+}
