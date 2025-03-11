@@ -61,7 +61,7 @@ export const likeTweet = async (req, res) => {
         const tweet = await Tweet.findById(req.params.id);
         if (tweet.likes.includes(user._id)) {
             // Unlike the tweet
-            tweet.likes = tweet.likes.filter(like => like != user._id);
+            tweet.likes = tweet.likes.filter(like => like.toString() !== user._id.toString());
         } else {
             // Like the tweet
             tweet.likes.push(user._id);
@@ -87,7 +87,7 @@ export const retweetTweet = async (req, res) => {
         const tweet = await Tweet.findById(req.params.id);
         if (tweet.retweets.includes(user._id)) {
             // Unretweet the tweet
-            tweet.retweets = tweet.retweets.filter(retweet => retweet != user._id);
+            tweet.retweets = tweet.retweets.filter(retweet => retweet.toString() !== user._id.toString());
         } else {
             // Retweet the tweet
             tweet.retweets.push(user._id);
@@ -201,6 +201,19 @@ export const replyToTweet = async (req, res) => {
             "mentions": mentions
         });
         return res.status(201).json(tweet);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+export const getReplies = async (req, res) => {
+    if (!req.params.id) {
+        return res.status(400).json({ message: 'Please provide tweet ID' });
+    }
+
+    try {
+        const tweets = await Tweet.find({ replyTo: req.params.id });
+        return res.status(200).json(tweets);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
