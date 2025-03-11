@@ -1,0 +1,94 @@
+/* src/App.css */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+  color: #14171a;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e6ecf0;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #1da1f2;
+}
+
+.search-bar input {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #e6ecf0;
+  background-color: #f5f8fa;
+  width: 250px;
+}
+
+.user-menu img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+}
+
+.main-nav {
+  width: 250px;
+  padding: 20px;
+  border-right: 1px solid #e6ecf0;
+}
+
+.main-nav ul {
+  list-style: none;
+}
+
+.main-nav li {
+  padding: 12px 15px;
+  border-radius: 30px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.main-nav li:hover {
+  background-color: rgba(29, 161, 242, 0.1);
+  color: #1da1f2;
+}
+
+.main-nav li.active {
+  color: #1da1f2;
+}
+
+.main-nav li i {
+  margin-right: 15px;
+  font-size: 1.2em;
+}
+
+.main-content {
+  flex: 1;
+}
