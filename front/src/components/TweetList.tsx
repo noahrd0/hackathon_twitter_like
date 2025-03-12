@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import CreateTweet from './CreateTweet';
+import Tweet from './tweets/Tweet';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-
 
 const TweetList = () => {
   interface Tweet {
@@ -34,8 +34,8 @@ const TweetList = () => {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5201/api/tweets', {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!response.ok) {
         throw new Error('Erreur lors de la récupération des tweets');
@@ -49,37 +49,17 @@ const TweetList = () => {
     }
   };
 
-  const getYouTubeEmbedUrl = (url: string): string => {
-    // Extraire l'ID de la vidéo YouTube
-    let videoId = '';
-    
-    // Format: https://www.youtube.com/watch?v=VIDEO_ID
-    if (url.includes('youtube.com/watch')) {
-      const urlParams = new URLSearchParams(new URL(url).search);
-      videoId = urlParams.get('v') || '';
-    }
-    // Format: https://youtu.be/VIDEO_ID
-    else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1];
-      // Supprimer les paramètres supplémentaires
-      if (videoId.includes('?')) {
-        videoId = videoId.split('?')[0];
-      }
-    }
-    
-    return `https://www.youtube.com/embed/${videoId}`;
-  };
-
+  // Fonction pour liker un tweet
   const handleLikeTweet = async (tweetId: string) => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5201/api/tweets/like/${tweetId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       if (response.ok) {
         // Actualiser la liste des tweets
         fetchTweets();
@@ -89,16 +69,17 @@ const TweetList = () => {
     }
   };
 
+  // Fonction pour retweeter
   const handleRetweet = async (tweetId: string) => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5201/api/tweets/retweet/${tweetId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       if (response.ok) {
         // Actualiser la liste des tweets
         fetchTweets();
@@ -106,8 +87,14 @@ const TweetList = () => {
     } catch (error) {
       console.error('Erreur lors du retweet:', error);
     }
-  }
+  };
 
+  // Fonction pour répondre à un tweet
+  const handleReply = (tweetId: string) => {
+    window.location.href = `/tweet/${tweetId}`;
+  };
+
+  // Fonction pour récupérer l'ID de l'utilisateur connecté depuis le token
   const getUserIdFromToken = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -136,91 +123,16 @@ const TweetList = () => {
         <div className="col-md-8">
           <CreateTweet onTweetCreated={fetchTweets} />
           {/* Liste des tweets */}
-          {tweets.map((tweet) => {
-            const hasLiked = userId && tweet.likes.includes(userId); // Vérifie si l'utilisateur a liké le tweet
-            const hasRetweeted = userId && tweet.retweets.includes(userId); // Vérifie si l'utilisateur a retweeté le tweet
-
-            return (
-              <div id={tweet._id} key={tweet._id} className="card mb-3">
-                <div className="card-body">
-                  {/* En-tête du tweet (utilisateur et date) */}
-                  <div className="d-flex align-items-center mb-3">
-                    <img
-                      src={tweet.author.profilePicture || 'https://via.placeholder.com/50'}
-                      alt="Profile"
-                      className="rounded-circle me-3"
-                      width="50"
-                      height="50"
-                    />
-                    <div>
-                      <h5 className="card-title mb-0">{tweet.author.username}</h5>
-                      <small className="text-muted">
-                        @{tweet.author.username} · {new Date(tweet.timestamp).toLocaleDateString()}
-                      </small>
-                    </div>
-                  </div>
-
-                  {/* Contenu du tweet */}
-                  <p className="card-text">{tweet.content}</p>
-
-                  {/* Image du tweet (optionnelle) */}
-                  {tweet.image && (
-                    <img
-                      src={tweet.image}
-                      alt="Tweet"
-                      className="img-fluid rounded mb-3"
-                    />
-                  )}
-
-                  {tweet.video && (
-                    tweet.video.includes('youtube.com') || tweet.video.includes('youtu.be') ? (
-                      // Extraire l'ID de la vidéo YouTube et créer un iframe
-                      <iframe
-                        className="img-fluid rounded mb-3"
-                        width="100%"
-                        height="315"
-                        src={getYouTubeEmbedUrl(tweet.video)}
-                        title="YouTube video player"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    ) : (
-                      // Utiliser le lecteur vidéo standard pour les autres types de vidéos
-                      <video
-                        src={tweet.video}
-                        controls
-                        className="img-fluid rounded mb-3"
-                      />
-                    )
-                  )}
-
-                  {/* Actions (like, retweet, etc.) */}
-                  <div className="d-flex justify-content-between">
-                  <button
-                    className={`btn btn-outline-secondary btn-sm ${hasLiked ? 'text-danger' : ''}`}
-                    onClick={() => handleLikeTweet(tweet._id)}
-                  >
-                    <i className={`bi ${hasLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i> {tweet.likes.length}
-                  </button>
-                    <button className={`btn btn-outline-secondary btn-sm ${hasRetweeted ? 'text-success' : ''}`}
-                      onClick={() => handleRetweet(tweet._id)}
-                    >
-                      <i className="bi bi-repeat"></i> {tweet.retweets.length}
-                    </button>
-                    <button className="btn btn-outline-secondary btn-sm"
-                      onClick={() => window.location.href = `/tweet/${tweet._id}`}                    
-                    >
-                      <i className="bi bi-chat"></i>
-                    </button>
-                    <button className="btn btn-outline-secondary btn-sm">
-                      <i className="bi bi-share"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {tweets.map((tweet) => (
+            <Tweet
+              key={tweet._id}
+              tweet={tweet}
+              userId={userId}
+              onLike={handleLikeTweet}
+              onRetweet={handleRetweet}
+              onReply={handleReply}
+            />
+          ))}
         </div>
       </div>
     </div>
