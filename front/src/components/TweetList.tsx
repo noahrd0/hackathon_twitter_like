@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import CreateTweet from './CreateTweet';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -46,6 +47,27 @@ const TweetList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getYouTubeEmbedUrl = (url: string): string => {
+    // Extraire l'ID de la vidéo YouTube
+    let videoId = '';
+    
+    // Format: https://www.youtube.com/watch?v=VIDEO_ID
+    if (url.includes('youtube.com/watch')) {
+      const urlParams = new URLSearchParams(new URL(url).search);
+      videoId = urlParams.get('v') || '';
+    }
+    // Format: https://youtu.be/VIDEO_ID
+    else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1];
+      // Supprimer les paramètres supplémentaires
+      if (videoId.includes('?')) {
+        videoId = videoId.split('?')[0];
+      }
+    }
+    
+    return `https://www.youtube.com/embed/${videoId}`;
   };
 
   const handleLikeTweet = async (tweetId: string) => {
@@ -112,6 +134,7 @@ const TweetList = () => {
     <div className="container mt-5">
       <div className="row justify-content-center">
         <div className="col-md-8">
+          <CreateTweet onTweetCreated={fetchTweets} />
           {/* Liste des tweets */}
           {tweets.map((tweet) => {
             const hasLiked = userId && tweet.likes.includes(userId); // Vérifie si l'utilisateur a liké le tweet
@@ -147,6 +170,29 @@ const TweetList = () => {
                       alt="Tweet"
                       className="img-fluid rounded mb-3"
                     />
+                  )}
+
+                  {tweet.video && (
+                    tweet.video.includes('youtube.com') || tweet.video.includes('youtu.be') ? (
+                      // Extraire l'ID de la vidéo YouTube et créer un iframe
+                      <iframe
+                        className="img-fluid rounded mb-3"
+                        width="100%"
+                        height="315"
+                        src={getYouTubeEmbedUrl(tweet.video)}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    ) : (
+                      // Utiliser le lecteur vidéo standard pour les autres types de vidéos
+                      <video
+                        src={tweet.video}
+                        controls
+                        className="img-fluid rounded mb-3"
+                      />
+                    )
                   )}
 
                   {/* Actions (like, retweet, etc.) */}

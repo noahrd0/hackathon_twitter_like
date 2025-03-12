@@ -4,6 +4,7 @@ import { decodeToken } from "../config/jwt.js";
 
 export const createTweet = async (req, res) => {
     const { content, image, video } = req.body;
+    console.log(req.body);
     if (!content) {
         return res.status(400).json({ message: 'Please provide content' });
     }
