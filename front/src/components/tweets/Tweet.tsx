@@ -74,79 +74,119 @@ const Tweet = ({ tweet, userId, onTweetUpdated }: TweetProps) => {
   const hasLiked = userId && tweet.likes.includes(userId);
   const hasRetweeted = userId && tweet.retweets.includes(userId);
 
+  // Styles pour l'adaptation au thème
+  const customStyles = `
+    .tweet-card {
+      background-color: var(--ipssi-card-bg);
+      border: 1px solid var(--ipssi-border-color);
+      color: var(--ipssi-text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    .tweet-text {
+      color: var(--ipssi-text-primary);
+    }
+    
+    .tweet-username {
+      color: var(--ipssi-text-secondary);
+    }
+    
+    .tweet-action {
+      color: var(--ipssi-text-secondary);
+      background-color: transparent;
+      border-color: var(--ipssi-border-color);
+      transition: all 0.2s ease;
+    }
+    
+    .tweet-action:hover {
+      background-color: rgba(29, 161, 242, 0.1);
+    }
+    
+    .tweet-action.liked {
+      color: #e0245e;
+    }
+    
+    .tweet-action.retweeted {
+      color: #17bf63;
+    }
+  `;
+
   return (
-    <div id={tweet._id} className="card mb-3">
-      <div className="card-body">
-        {/* En-tête du tweet (utilisateur et date) */}
-        <div className="d-flex align-items-center mb-3">
-          <img
-            src={tweet.author.profilePicture || 'https://via.placeholder.com/50'}
-            alt="Profile"
-            className="rounded-circle me-3"
-            width="50"
-            height="50"
-          />
-          <div>
-            <h5 className="card-title mb-0">{tweet.author.username}</h5>
-            <small className="text-muted">
-              @{tweet.author.username} · {new Date(tweet.timestamp).toLocaleDateString()}
-            </small>
+    <>
+      <style>{customStyles}</style>
+      <div id={tweet._id} className="card mb-3 tweet-card">
+        <div className="card-body">
+          {/* En-tête du tweet (utilisateur et date) */}
+          <div className="d-flex align-items-center mb-3">
+            <img
+              src={tweet.author.profilePicture || 'https://via.placeholder.com/50'}
+              alt="Profile"
+              className="rounded-circle me-3"
+              width="50"
+              height="50"
+            />
+            <div>
+              <h5 className="card-title mb-0 tweet-text">{tweet.author.username}</h5>
+              <small className="tweet-username">
+                @{tweet.author.username} · {new Date(tweet.timestamp).toLocaleDateString()}
+              </small>
+            </div>
+          </div>
+
+          {/* Contenu du tweet */}
+          <p className="card-text tweet-text">{tweet.content}</p>
+
+          {/* Image ou vidéo du tweet */}
+          {tweet.image && (
+            <img
+              src={tweet.image}
+              alt="Tweet"
+              className="img-fluid rounded mb-3"
+            />
+          )}
+
+          {tweet.video && (
+            <video
+              src={tweet.video}
+              controls
+              className="img-fluid rounded mb-3"
+            />
+          )}
+
+          {/* Actions sur le tweet */}
+          <div className="d-flex justify-content-between">
+            {/* Bouton Like */}
+            <button
+              className={`btn btn-sm tweet-action ${hasLiked ? 'liked' : ''}`}
+              onClick={() => handleLikeTweet(tweet._id)}
+            >
+              <i className={`bi ${hasLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i> {tweet.likes.length}
+            </button>
+
+            {/* Bouton Retweet */}
+            <button
+              className={`btn btn-sm tweet-action ${hasRetweeted ? 'retweeted' : ''}`}
+              onClick={() => handleRetweet(tweet._id)}
+            >
+              <i className="bi bi-repeat"></i> {tweet.retweets.length}
+            </button>
+
+            {/* Bouton Répondre */}
+            <button
+              className="btn btn-sm tweet-action"
+              onClick={() => handleReply(tweet._id)}
+            >
+              <i className="bi bi-chat"></i>
+            </button>
+
+            {/* Bouton Partager */}
+            <button className="btn btn-sm tweet-action">
+              <i className="bi bi-share"></i>
+            </button>
           </div>
         </div>
-
-        {/* Contenu du tweet */}
-        <p className="card-text">{tweet.content}</p>
-
-        {/* Image ou vidéo du tweet */}
-        {tweet.image && (
-          <img
-            src={tweet.image}
-            alt="Tweet"
-            className="img-fluid rounded mb-3"
-          />
-        )}
-
-        {tweet.video && (
-          <video
-            src={tweet.video}
-            controls
-            className="img-fluid rounded mb-3"
-          />
-        )}
-
-        {/* Actions sur le tweet */}
-        <div className="d-flex justify-content-between">
-          {/* Bouton Like */}
-          <button
-            className={`btn btn-outline-secondary btn-sm ${hasLiked ? 'text-danger' : ''}`}
-            onClick={() => handleLikeTweet(tweet._id)}
-          >
-            <i className={`bi ${hasLiked ? 'bi-heart-fill' : 'bi-heart'}`}></i> {tweet.likes.length}
-          </button>
-
-          {/* Bouton Retweet */}
-          <button
-            className={`btn btn-outline-secondary btn-sm ${hasRetweeted ? 'text-success' : ''}`}
-            onClick={() => handleRetweet(tweet._id)}
-          >
-            <i className="bi bi-repeat"></i> {tweet.retweets.length}
-          </button>
-
-          {/* Bouton Répondre */}
-          <button
-            className="btn btn-outline-secondary btn-sm"
-            onClick={() => handleReply(tweet._id)}
-          >
-            <i className="bi bi-chat"></i>
-          </button>
-
-          {/* Bouton Partager */}
-          <button className="btn btn-outline-secondary btn-sm">
-            <i className="bi bi-share"></i>
-          </button>
-        </div>
       </div>
-    </div>
+    </>
   );
 };
 

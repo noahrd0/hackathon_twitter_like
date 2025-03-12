@@ -1,91 +1,146 @@
 import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm.tsx';
 import RegisterForm from './components/RegisterForm.tsx';
 import TweetList from './components/TweetList.tsx';
 import TweetDetail from './components/TweetDetails.tsx';
-import Profile from './components/Profile.tsx'; // Import du composant Profile existant
+import Profile from './components/Profile.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Navbar, Nav, Form, FormControl, Button, Badge } from 'react-bootstrap';
 
-// Styles personnalisés pour imiter Twitter
-const customStyles = `
-  :root {
-    --ipssi-blue: #15202b;
-    --ipssi-light-blue: #1DA1F2;
-    --ipssi-text: #ffffff;
-    --ipssi-border: #38444d;
-    --ipssi-bg: #192734;
-  }
-  
-  body {
-    background-color: var(--ipssi-bg);
-    color: var(--ipssi-text);
-  }
-  
-  .ipssi-navbar {
-    background-color: var(--ipssi-blue) !important;
-    color: var(--ipssi-text);
-    border-bottom: 1px solid var(--ipssi-border);
-  }
-  
-  .ipssi-navbar .navbar-brand {
-    color: var(--ipssi-text);
-    font-weight: bold;
-  }
-  
-  .ipssi-btn-primary {
-    background-color: var(--ipssi-light-blue);
-    border-color: var(--ipssi-light-blue);
-  }
-  
-  .ipssi-btn-outline {
-    color: var(--ipssi-light-blue);
-    border-color: var(--ipssi-light-blue);
-  }
-  
-  .ipssi-sidebar {
-    background-color: var(--ipssi-blue);
-    border-right: 1px solid var(--ipssi-border);
-  }
-  
-  .ipssi-sidebar .nav-link {
-    color: var(--ipssi-text);
-    font-size: 18px;
-    padding: 12px 16px;
-    border-radius: 30px;
-    margin-bottom: 8px;
-  }
-  
-  .ipssi-sidebar .nav-link:hover {
-    background-color: rgba(29, 161, 242, 0.1);
-  }
-  
-  .ipssi-main {
-    background-color: var(--ipssi-bg);
-    border-left: 1px solid var(--ipssi-border);
-    border-right: 1px solid var(--ipssi-border);
-  }
-  
-  .ipssi-search {
-    background-color: var(--ipssi-bg);
-    border-radius: 20px;
-    border: 1px solid var(--ipssi-border);
-    color: var(--ipssi-text);
-  }
-  
-  .ipssi-post-btn {
-    border-radius: 30px;
-    padding: 10px 20px;
-    font-weight: bold;
-  }
-  
-  .ipssi-icon {
-    font-size: 24px;
-    margin-right: 10px;
-  }
-`;
-
 function Layout({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState('dark');
+  
+  useEffect(() => {
+    document.body.className = theme === 'dark' ? 'theme-dark' : 'theme-light';
+    
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const customStyles = `
+    :root {
+      --ipssi-blue: #15202b;
+      --ipssi-light-blue: #1DA1F2;
+      --ipssi-text: #ffffff;
+      --ipssi-border: #38444d;
+      --ipssi-bg: #192734;
+    }
+    
+    /* Thème sombre (par défaut) */
+    .theme-dark {
+      --ipssi-bg-primary: #15202b;
+      --ipssi-bg-secondary: #192734;
+      --ipssi-text-primary: #ffffff;
+      --ipssi-text-secondary: #8899a6;
+      --ipssi-border-color: #38444d;
+      --ipssi-highlight: #1DA1F2;
+      --ipssi-card-bg: #22303c;
+    }
+    
+    /* Thème clair */
+    .theme-light {
+      --ipssi-bg-primary: #ffffff;
+      --ipssi-bg-secondary: #f7f9fa;
+      --ipssi-text-primary: #14171a;
+      --ipssi-text-secondary: #657786;
+      --ipssi-border-color: #e1e8ed;
+      --ipssi-highlight: #1DA1F2;
+      --ipssi-card-bg: #ffffff;
+    }
+    
+    body {
+      background-color: var(--ipssi-bg-secondary);
+      color: var(--ipssi-text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    .ipssi-navbar {
+      background-color: var(--ipssi-bg-primary) !important;
+      color: var(--ipssi-text-primary);
+      border-bottom: 1px solid var(--ipssi-border-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    .ipssi-navbar .navbar-brand {
+      color: var(--ipssi-text-primary);
+      font-weight: bold;
+    }
+    
+    .ipssi-btn-primary {
+      background-color: var(--ipssi-highlight);
+      border-color: var(--ipssi-highlight);
+    }
+    
+    .ipssi-btn-outline {
+      color: var(--ipssi-highlight);
+      border-color: var(--ipssi-highlight);
+    }
+    
+    .ipssi-sidebar {
+      background-color: var(--ipssi-bg-primary);
+      border-right: 1px solid var(--ipssi-border-color);
+      transition: background-color 0.3s ease;
+    }
+    
+    .ipssi-sidebar .nav-link {
+      color: var(--ipssi-text-primary);
+      font-size: 18px;
+      padding: 12px 16px;
+      border-radius: 30px;
+      margin-bottom: 8px;
+    }
+    
+    .ipssi-sidebar .nav-link:hover {
+      background-color: rgba(29, 161, 242, 0.1);
+    }
+    
+    .ipssi-main {
+      background-color: var(--ipssi-bg-secondary);
+      border-left: 1px solid var(--ipssi-border-color);
+      border-right: 1px solid var(--ipssi-border-color);
+      transition: background-color 0.3s ease;
+    }
+    
+    .ipssi-search {
+      background-color: var(--ipssi-bg-secondary);
+      border-radius: 20px;
+      border: 1px solid var(--ipssi-border-color);
+      color: var(--ipssi-text-primary);
+    }
+    
+    .ipssi-post-btn {
+      border-radius: 30px;
+      padding: 10px 20px;
+      font-weight: bold;
+    }
+    
+    .ipssi-icon {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+    
+    .trend-card {
+      background-color: var(--ipssi-card-bg);
+      border: 1px solid var(--ipssi-border-color);
+      transition: background-color 0.3s ease;
+    }
+    
+    /* Correction pour le texte secondaire selon le thème */
+    .theme-text-secondary {
+      color: var(--ipssi-text-secondary) !important;
+    }
+    
+    /* Icônes pour le sélecteur de thème */
+    .theme-toggle-icon {
+      font-size: 20px;
+      cursor: pointer;
+    }
+  `;
+
   return (
     <>
       {/* Injecter les styles personnalisés */}
@@ -108,7 +163,21 @@ function Layout({ children }: { children: React.ReactNode }) {
               <i className="bi bi-search"></i>
             </Button>
           </Form>
-          <div>
+          <div className="d-flex align-items-center">
+            {/* Bouton de toggle du thème */}
+            <Button 
+              variant="link" 
+              className="me-3 p-1" 
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Passer au mode jour' : 'Passer au mode nuit'}
+            >
+              {theme === 'dark' ? (
+                <i className="bi bi-sun-fill theme-toggle-icon text-warning"></i>
+              ) : (
+                <i className="bi bi-moon-fill theme-toggle-icon text-primary"></i>
+              )}
+            </Button>
+            
             <Button as={Link} to="/login" variant="outline-primary" className="me-2 ipssi-btn-outline">
               Se connecter
             </Button>
@@ -159,26 +228,26 @@ function Layout({ children }: { children: React.ReactNode }) {
           
           {/* Colonne de tendances (comme sur Twitter) */}
           <Col md={3} className="p-3">
-            <div className="bg-dark rounded p-3 mb-3">
+            <div className="trend-card rounded p-3 mb-3">
               <h6 className="mb-3 fw-bold">Tendances pour vous</h6>
               <div className="mb-3">
-                <small className="text-muted">Tendance en France</small>
+                <small className="theme-text-secondary">Tendance en France</small>
                 <p className="mb-0 fw-bold">#IPSSI2025</p>
-                <small className="text-muted">8 542 posts</small>
+                <small className="theme-text-secondary">8 542 posts</small>
               </div>
               <div className="mb-3">
-                <small className="text-muted">Technologie · Tendance</small>
+                <small className="theme-text-secondary">Technologie · Tendance</small>
                 <p className="mb-0 fw-bold">React.js</p>
-                <small className="text-muted">5 234 posts</small>
+                <small className="theme-text-secondary">5 234 posts</small>
               </div>
               <div className="mb-3">
-                <small className="text-muted">Éducation</small>
+                <small className="theme-text-secondary">Éducation</small>
                 <p className="mb-0 fw-bold">École IPSSI</p>
-                <small className="text-muted">3 128 posts</small>
+                <small className="theme-text-secondary">3 128 posts</small>
               </div>
             </div>
             
-            <div className="bg-dark rounded p-3">
+            <div className="trend-card rounded p-3">
               <h6 className="mb-3 fw-bold">Suggestions</h6>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div className="d-flex align-items-center">
@@ -187,7 +256,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                   </div>
                   <div>
                     <p className="mb-0 fw-bold">IPSSI Paris</p>
-                    <small className="text-muted">@ipssi_paris</small>
+                    <small className="theme-text-secondary">@ipssi_paris</small>
                   </div>
                 </div>
                 <Button size="sm" variant="primary" className="ipssi-btn-primary rounded-pill">Suivre</Button>
@@ -199,7 +268,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                   </div>
                   <div>
                     <p className="mb-0 fw-bold">IPSSI Tech</p>
-                    <small className="text-muted">@ipssi_tech</small>
+                    <small className="theme-text-secondary">@ipssi_tech</small>
                   </div>
                 </div>
                 <Button size="sm" variant="primary" className="ipssi-btn-primary rounded-pill">Suivre</Button>
