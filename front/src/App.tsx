@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm.tsx';
 import RegisterForm from './components/RegisterForm.tsx';
@@ -9,70 +9,40 @@ import BookmarksList from './components/BookmarksList.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Navbar, Nav, Form, FormControl, Button, Badge } from 'react-bootstrap';
 
-// Composant pour le menu latéral qui utilise le useLocation
-function SidebarMenu() {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  
-  // Fonction pour déterminer si une route est active
-  const isActive = (path) => {
-    if (path === '/' && currentPath === '/') {
-      return true;
-    }
-    return path !== '/' && currentPath.startsWith(path);
-  };
-
-  return (
-    <Nav className="flex-column">
-      <Nav.Link as={Link} to="/" className={`mb-2 ${isActive('/') ? 'fw-bold' : ''}`}>
-        <i className={`bi ${isActive('/') ? 'bi-house-door-fill' : 'bi-house-door'} ipssi-icon`}></i> Accueil
-      </Nav.Link>
-      <Nav.Link as={Link} to="/notifications" className={`mb-2 ${isActive('/notifications') ? 'fw-bold' : ''}`}>
-        <i className={`bi ${isActive('/notifications') ? 'bi-bell-fill' : 'bi-bell'} ipssi-icon`}></i> Notifications
-        <Badge bg="danger" className="ms-2">5</Badge>
-      </Nav.Link>
-      <Nav.Link as={Link} to="/bookmarks" className={`mb-2 ${isActive('/bookmarks') ? 'fw-bold' : ''}`}>
-        <i className={`bi ${isActive('/bookmarks') ? 'bi-bookmark-fill' : 'bi-bookmark'} ipssi-icon`}></i> Signets
-      </Nav.Link>
-      <Nav.Link as={Link} to="/profile" className={`mb-2 ${isActive('/profile') ? 'fw-bold' : ''}`}>
-        <i className={`bi ${isActive('/profile') ? 'bi-person-fill' : 'bi-person'} ipssi-icon`}></i> Profil
-      </Nav.Link>
-      
-      <Button 
-        variant="primary" 
-        className="ipssi-btn-primary ipssi-post-btn mt-3 w-100"
-      >
-        Publier
-      </Button>
-    </Nav>
-  );
-}
-
 function Layout({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState('dark');
-  const location = useLocation();
-  
-  useEffect(() => {
-    document.body.className = theme === 'dark' ? 'theme-dark' : 'theme-light';
-    
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-  
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+  const [anger, setAnger] = useState(0);
+  const [joy, setJoy] = useState(0);
+  const [sadness, setSadness] = useState(0);
+
+  // Fonction pour générer des émotions aléatoires
+  const generateEmotions = () => {
+    const newAnger = Math.floor(Math.random() * 100);
+    const newJoy = Math.floor(Math.random() * 100);
+    const newSadness = Math.floor(Math.random() * 100);
+
+    // Normaliser pour que la somme fasse 100
+    const total = newAnger + newJoy + newSadness;
+    setAnger(Math.round((newAnger / total) * 100));
+    setJoy(Math.round((newJoy / total) * 100));
+    setSadness(Math.round((newSadness / total) * 100));
   };
 
-  // Fonction pour obtenir le titre de la page en fonction de l'URL
-  const getPageTitle = () => {
-    const path = location.pathname;
-    if (path === '/') return 'Accueil';
-    if (path === '/profile') return 'Profil';
-    if (path === '/notifications') return 'Notifications';
-    if (path === '/bookmarks') return 'Signets';
-    if (path === '/login') return 'Connexion';
-    if (path === '/register') return 'Inscription';
-    if (path.startsWith('/tweet/')) return 'Tweet';
-    return 'TwippsI.A';
+  // Mettre à jour les émotions toutes les 5 secondes
+  useEffect(() => {
+    generateEmotions(); // Initialiser les émotions au premier rendu
+    const interval = setInterval(generateEmotions, 5000); // Mettre à jour toutes les 5 secondes
+    return () => clearInterval(interval); // Nettoyer l'intervalle lors du démontage
+  }, []);
+
+  // Gestion du thème
+  useEffect(() => {
+    document.body.className = theme === 'dark' ? 'theme-dark' : 'theme-light';
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const customStyles = `
@@ -152,10 +122,6 @@ function Layout({ children }: { children: React.ReactNode }) {
       background-color: rgba(29, 161, 242, 0.1);
     }
     
-    .ipssi-sidebar .nav-link.fw-bold {
-      color: var(--ipssi-highlight);
-    }
-    
     .ipssi-main {
       background-color: var(--ipssi-bg-secondary);
       border-left: 1px solid var(--ipssi-border-color);
@@ -187,24 +153,39 @@ function Layout({ children }: { children: React.ReactNode }) {
       transition: background-color 0.3s ease;
     }
     
-    /* Correction pour le texte secondaire selon le thème */
     .theme-text-secondary {
       color: var(--ipssi-text-secondary) !important;
     }
     
-    /* Icônes pour le sélecteur de thème */
     .theme-toggle-icon {
       font-size: 20px;
       cursor: pointer;
+    }
+    
+    .mood-control {
+      background-color: var(--ipssi-card-bg);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    .mood-control .mood-emotion {
+      font-size: 36px;
+    }
+    
+    .mood-control .mood-bar {
+      margin-top: 10px;
+    }
+    
+    .mood-control .mood-bar span {
+      font-size: 14px;
     }
   `;
 
   return (
     <>
-      {/* Injecter les styles personnalisés */}
       <style>{customStyles}</style>
       
-      {/* Barre de navigation */}
       <Navbar expand="lg" className="ipssi-navbar px-3 shadow-sm">
         <Navbar.Brand as={Link} to="/">
           <span className="fs-4">𝕀</span> TwippsI.A
@@ -222,7 +203,6 @@ function Layout({ children }: { children: React.ReactNode }) {
             </Button>
           </Form>
           <div className="d-flex align-items-center">
-            {/* Bouton de toggle du thème */}
             <Button 
               variant="link" 
               className="me-3 p-1" 
@@ -248,23 +228,34 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <Container fluid>
         <Row>
-          {/* Menu latéral avec le composant SidebarMenu */}
-          <Col md={3} className="ipssi-sidebar vh-100 p-4">
-            <SidebarMenu />
+          <Col md={2} className="ipssi-sidebar vh-100 p-4">
+            <Nav className="flex-column">
+              <Nav.Link as={Link} to="/" className="mb-2">
+                <i className="bi bi-house-door-fill ipssi-icon"></i> Accueil
+              </Nav.Link>
+              <Nav.Link as={Link} to="/notifications" className="mb-2">
+                <i className="bi bi-bell ipssi-icon"></i> Notifications
+                <Badge bg="danger" className="ms-2">5</Badge>
+              </Nav.Link>
+              <Nav.Link as={Link} to="/bookmarks" className="mb-2">
+                <i className="bi bi-bookmark ipssi-icon"></i> Signets
+              </Nav.Link>
+              <Nav.Link as={Link} to="/profile" className="mb-2">
+                <i className="bi bi-person ipssi-icon"></i> Profil
+              </Nav.Link>
+            </Nav>
           </Col>
           
-          {/* Contenu principal */}
-          <Col md={6} className="ipssi-main p-0">
+          <Col md={8} className="ipssi-main p-0">
             <div className="border-bottom p-3">
-              <h5 className="mb-0 fw-bold">{getPageTitle()}</h5>
+              <h5 className="mb-0 fw-bold">Accueil</h5>
             </div>
             <div className="p-3">
               {children}
             </div>
           </Col>
           
-          {/* Colonne de tendances (comme sur Twitter) */}
-          <Col md={3} className="p-3">
+          <Col md={2} className="p-3">
             <div className="trend-card rounded p-3 mb-3">
               <h6 className="mb-3 fw-bold">Tendances pour vous</h6>
               <div className="mb-3">
@@ -311,6 +302,37 @@ function Layout({ children }: { children: React.ReactNode }) {
                 <Button size="sm" variant="primary" className="ipssi-btn-primary rounded-pill">Suivre</Button>
               </div>
             </div>
+            
+            {/* Mood Control */}
+            <div className="mood-control">
+              <h6 className="mb-3 fw-bold">Contrôleur d'Humeur</h6>
+              <div className="mood-emotion">
+                <span>😡</span> Colère: <span id="anger">{anger}%</span>
+                <br />
+                <span>😊</span> Joie: <span id="joy">{joy}%</span>
+                <br />
+                <span>😢</span> Tristesse: <span id="sadness">{sadness}%</span>
+              </div>
+              <div className="mood-bar">
+                <div className="progress">
+                  <div
+                    className="progress-bar bg-danger"
+                    style={{ width: `${anger}%` }}
+                    role="progressbar"
+                  ></div>
+                  <div
+                    className="progress-bar bg-success"
+                    style={{ width: `${joy}%` }}
+                    role="progressbar"
+                  ></div>
+                  <div
+                    className="progress-bar bg-primary"
+                    style={{ width: `${sadness}%` }}
+                    role="progressbar"
+                  ></div>
+                </div>
+              </div>
+            </div>
           </Col>
         </Row>
       </Container>
@@ -321,15 +343,16 @@ function Layout({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<Layout><TweetList /></Layout>} />
-        <Route path='/login' element={<Layout><LoginForm /></Layout>} />
-        <Route path='/register' element={<Layout><RegisterForm /></Layout>} />
-        <Route path='/profile' element={<Layout><Profile /></Layout>} />
-        <Route path='/tweet/:tweetId' element={<Layout><TweetDetail /></Layout>} />
-        <Route path='/notifications' element={<Layout><div>Notifications</div></Layout>} />
-        <Route path='/bookmarks' element={<Layout><BookmarksList /></Layout>} />
-      </Routes>
+      <Layout>
+        <Routes>
+          <Route path='/login' element={<LoginForm />} />
+          <Route path='/' element={<TweetList />} />
+          <Route path='/tweet/:tweetId' element={<TweetDetail tweetId={useParams().tweetId} />} />
+          <Route path='/register' element={<RegisterForm />} />
+          <Route path='/profile' element={<Profile />} />
+          <Route path='/bookmarks' element={<BookmarksList />} />
+        </Routes>
+      </Layout>
     </BrowserRouter>
   );
 }
