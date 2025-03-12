@@ -49,51 +49,6 @@ const TweetList = () => {
     }
   };
 
-  // Fonction pour liker un tweet
-  const handleLikeTweet = async (tweetId: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5201/api/tweets/like/${tweetId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        // Actualiser la liste des tweets
-        fetchTweets();
-      }
-    } catch (error) {
-      console.error('Erreur lors du like:', error);
-    }
-  };
-
-  // Fonction pour retweeter
-  const handleRetweet = async (tweetId: string) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5201/api/tweets/retweet/${tweetId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        // Actualiser la liste des tweets
-        fetchTweets();
-      }
-    } catch (error) {
-      console.error('Erreur lors du retweet:', error);
-    }
-  };
-
-  // Fonction pour répondre à un tweet
-  const handleReply = (tweetId: string) => {
-    window.location.href = `/tweet/${tweetId}`;
-  };
-
   // Fonction pour récupérer l'ID de l'utilisateur connecté depuis le token
   const getUserIdFromToken = () => {
     const token = localStorage.getItem('token');
@@ -128,9 +83,7 @@ const TweetList = () => {
               key={tweet._id}
               tweet={tweet}
               userId={userId}
-              onLike={handleLikeTweet}
-              onRetweet={handleRetweet}
-              onReply={handleReply}
+              onTweetUpdated={fetchTweets}
             />
           ))}
         </div>
