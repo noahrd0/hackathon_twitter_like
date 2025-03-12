@@ -3,6 +3,7 @@ import LoginForm from './components/LoginForm.tsx';
 import RegisterForm from './components/RegisterForm.tsx';
 import TweetList from './components/TweetList.tsx';
 import TweetDetail from './components/TweetDetails.tsx';
+import Profile from './components/Profile.tsx'; // Import du composant Profile existant
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Navbar, Nav, Form, FormControl, Button, Badge } from 'react-bootstrap';
 
@@ -220,6 +221,7 @@ function App() {
           <Route path='/' element={<TweetList />} />
           <Route path='/tweet/:tweetId' element={<TweetDetail tweetId={useParams().tweetId} />} />
           <Route path='/register' element={<RegisterForm />} />
+          <Route path='/profile' element={<Profile />} />
         </Routes>
       </Layout>
     </BrowserRouter>
