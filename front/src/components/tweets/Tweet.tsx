@@ -17,6 +17,7 @@ interface TweetProps {
     mentions: string[];
     likes: string[];
     retweets: string[];
+    bookmarks: string[];
     replyTo?: string;
     timestamp: string;
   };
@@ -65,6 +66,27 @@ const Tweet = ({ tweet, userId, onTweetUpdated }: TweetProps) => {
     }
   };
 
+  // Fonction pour ajouter aux signets
+  const handleBookmarks = async (tweetId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5201/api/tweets/bookmark/${tweetId}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      console.log(response);
+      if (response.ok) {
+        // Actualiser la liste des tweets via le callback
+        onTweetUpdated();
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout aux signets:', error);
+    }
+  }
+
   // Fonction pour répondre à un tweet
   const handleReply = (tweetId: string) => {
     window.location.href = `/tweet/${tweetId}`;
@@ -73,6 +95,7 @@ const Tweet = ({ tweet, userId, onTweetUpdated }: TweetProps) => {
   // Vérifie si l'utilisateur a liké ou retweeté ce tweet
   const hasLiked = userId && tweet.likes.includes(userId);
   const hasRetweeted = userId && tweet.retweets.includes(userId);
+  const hasBookmarked = userId && tweet.bookmarks.includes(userId);
 
   // Styles pour l'adaptation au thème
   const customStyles = `
@@ -179,9 +202,11 @@ const Tweet = ({ tweet, userId, onTweetUpdated }: TweetProps) => {
               <i className="bi bi-chat"></i>
             </button>
 
-            {/* Bouton Partager */}
-            <button className="btn btn-sm tweet-action">
-              <i className="bi bi-share"></i>
+            {/* Bouton Signet */}
+            <button className="btn btn-sm tweet-action"
+              onClick={() => handleBookmarks(tweet._id)}
+            >
+              <i className={`bi ${hasBookmarked ? 'bi-bookmark-fill' : 'bi-bookmark'}`}></i>
             </button>
           </div>
         </div>

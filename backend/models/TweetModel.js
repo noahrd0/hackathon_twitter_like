@@ -33,6 +33,10 @@ const tweetSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }],
+    bookmarks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     replyTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tweet'

@@ -5,6 +5,7 @@ import RegisterForm from './components/RegisterForm.tsx';
 import TweetList from './components/TweetList.tsx';
 import TweetDetail from './components/TweetDetails.tsx';
 import Profile from './components/Profile.tsx';
+import BookmarksList from './components/BookmarksList.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Navbar, Nav, Form, FormControl, Button, Badge } from 'react-bootstrap';
 
@@ -327,7 +328,7 @@ function App() {
         <Route path='/profile' element={<Layout><Profile /></Layout>} />
         <Route path='/tweet/:tweetId' element={<Layout><TweetDetail /></Layout>} />
         <Route path='/notifications' element={<Layout><div>Notifications</div></Layout>} />
-        <Route path='/bookmarks' element={<Layout><div>Signets</div></Layout>} />
+        <Route path='/bookmarks' element={<Layout><BookmarksList /></Layout>} />
       </Routes>
     </BrowserRouter>
   );

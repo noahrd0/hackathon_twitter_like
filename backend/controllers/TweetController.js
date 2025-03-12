@@ -112,15 +112,15 @@ export const bookmarkTweet = async (req, res) => {
 
     try {
         const tweet = await Tweet.findById(req.params.id);
-        if (user.bookmarks.includes(tweet._id)) {
-            // Remove the bookmark
-            user.bookmarks = user.bookmarks.filter(bookmark => bookmark != tweet._id);
+        if (tweet.bookmarks.includes(user._id)) {
+            // Unbookmark the tweet
+            tweet.bookmarks = tweet.bookmarks.filter(bookmark => bookmark.toString() !== user._id.toString());
         } else {
             // Bookmark the tweet
-            user.bookmarks.push(tweet._id);
+            tweet.bookmarks.push(user._id);
         }
-        await user.save();
-        return res.status(200).json(user);
+        await tweet.save();
+        return res.status(200).json(tweet);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -130,7 +130,11 @@ export const getTweet = async (req, res) => {
     if (!req.params.id) {
         // Show all tweets
         try {
-            const tweets = await Tweet.find();
+            const tweets = await Tweet.find()
+                .populate('author', 'username profilePicture')
+                .populate('mentions', 'username profilePicture')
+                .populate('replyTo')
+                .sort({ timestamp: -1 });
             return res.status(200).json(tweets);
         } catch (error) {
             return res.status(500).json({ message: error.message });
@@ -138,7 +142,10 @@ export const getTweet = async (req, res) => {
     } else {
         // Show single tweet
         try {
-            const tweet = await Tweet.findById(req.params.id);
+            const tweet = await Tweet.findById(req.params.id)
+                .populate('author', 'username profilePicture')
+                .populate('mentions', 'username profilePicture')
+                .populate('replyTo');
             return res.status(200).json(tweet);
         } catch (error) {
             return res.status(500).json({ message: error.message });
@@ -214,6 +221,20 @@ export const getReplies = async (req, res) => {
 
     try {
         const tweets = await Tweet.find({ replyTo: req.params.id });
+        return res.status(200).json(tweets);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+export const getBookmarks = async (req, res) => {
+    // Get the User ID from the token
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = decodeToken(token);
+    const user = await User.findById(decodedToken.id);
+
+    try {
+        const tweets = await Tweet.find({ bookmarks: user._id });
         return res.status(200).json(tweets);
     } catch (error) {
         return res.status(500).json({ message: error.message });
