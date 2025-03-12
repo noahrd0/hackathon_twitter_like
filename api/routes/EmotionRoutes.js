@@ -1,5 +1,5 @@
 import express from 'express';
-import { detectEmotion, getEmotionHistory } from '../api/controllers/EmotionController.js';
+import { detectEmotion, getEmotionHistory } from '../controllers/EmotionController.js';
 import { authMiddleware } from '../middlewares/AuthMiddleware.js';
 
 const router = express.Router();

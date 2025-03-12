@@ -23,7 +23,19 @@ def realtime_emotion_detection():
         return
     
     # Détecteur de visages
-    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    try:
+        # Essayer le chemin standard
+        cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+        if not os.path.exists(cascade_path):
+            print(f"Chemin cascade non trouvé: {cascade_path}")
+            # Autre emplacement possible
+            cascade_path = os.path.join(os.path.dirname(cv2.__file__), 'data', 'haarcascade_frontalface_default.xml')
+        
+        face_cascade = cv2.CascadeClassifier(cascade_path)
+        print(f"Fichier cascade chargé depuis: {cascade_path}")
+    except Exception as e:
+        print(f"Erreur lors du chargement du cascade: {str(e)}")
+        return
     
     # Couleurs pour chaque émotion
     emotion_colors = {
