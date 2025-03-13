@@ -64,7 +64,7 @@ const TweetDetail = () => {
   return (
     <div className="container mt-5">
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div>
           <Tweet tweet={tweet} userId={userId} onTweetUpdated={fetchTweet} />
           <h4 className="mt-4 mb-3">Réponses</h4>
           {replies.length > 0 ? (

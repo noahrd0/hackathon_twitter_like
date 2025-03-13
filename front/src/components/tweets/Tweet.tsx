@@ -1,6 +1,7 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import { useNavigate } from 'react-router-dom';
 
 interface TweetProps {
   tweet: {
@@ -88,10 +89,11 @@ const Tweet = ({ tweet, userId, onTweetUpdated }: TweetProps) => {
   }
 
   // Fonction pour répondre à un tweet
-  const handleReply = (tweetId: string) => {
-    window.location.href = `/tweet/${tweetId}`;
-  };
+  const navigate = useNavigate();
 
+  const handleReply = (tweetId: string) => {
+    navigate(`/tweet/${tweetId}`);
+  };
   // Vérifie si l'utilisateur a liké ou retweeté ce tweet
   const hasLiked = userId && tweet.likes.includes(userId);
   const hasRetweeted = userId && tweet.retweets.includes(userId);
