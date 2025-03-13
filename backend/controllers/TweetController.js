@@ -243,14 +243,13 @@ export const getBookmarks = async (req, res) => {
 }
 
 export const getTweetFromUser = async (req, res) => {
-    if (req.params.id) {
+    if (req.params.username) {
         try {
-            const tweets = await Tweet.find({
-                $or: [
-                    { author: req.params.id, replyTo: { $exists: false } },
-                    { retweets: req.params.id, replyTo: { $exists: false } }
-                ]
-            })
+            const user = await User.findOne({ username: req.params.username });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            const tweets = await Tweet.find({ author: user._id })
                 .populate('author', 'username profilePicture')
                 .populate('mentions', 'username profilePicture')
                 .sort({ timestamp: -1 });

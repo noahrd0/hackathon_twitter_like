@@ -60,7 +60,7 @@ export const updateUser = async (req, res) => {
 }
 
 export const getUser = async (req, res) => {
-    if (!req.params.id) {
+    if (!req.params.username) {
         // Show connected user
         try {
             // Get the User ID from the token
@@ -76,7 +76,7 @@ export const getUser = async (req, res) => {
 
         // Show single user
         try {
-            const user = await User.findById(req.params.id);
+            const user = await User.findOne({ username: req.params.username });
             return res.status(200).json(user);
         } catch (error) {
             return res.status(500).json({ message: error.message });

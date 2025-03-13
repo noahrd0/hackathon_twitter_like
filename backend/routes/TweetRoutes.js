@@ -15,6 +15,7 @@ import { authMiddleware } from '../middlewares/AuthMiddleware.js';
 const router = express.Router();
 
 router.get('/getuserprofile', authMiddleware, getTweetFromUser);
+router.get('/getuserprofile/:username', authMiddleware, getTweetFromUser);
 router.post('/create', authMiddleware, createTweet);
 router.post('/reply/:id', authMiddleware, replyToTweet);
 router.get('/reply/:id', authMiddleware, getReplies);

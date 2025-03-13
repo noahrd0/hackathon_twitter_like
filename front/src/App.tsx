@@ -423,6 +423,11 @@ function App() {
                   <Profile />
                 </ProtectedRoute>
               } />
+              <Route path='/profile/:username' element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
               <Route path='/profile/edit' element={
                 <ProtectedRoute>
                   <ProfileEdit />

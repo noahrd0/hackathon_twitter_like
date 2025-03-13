@@ -91,6 +91,10 @@ const Tweet = ({ tweet, userId, onTweetUpdated }: TweetProps) => {
   // Fonction pour répondre à un tweet
   const navigate = useNavigate();
 
+  const handleProfile = (username: string) => {
+    navigate(`/profile/${username}`);
+  };
+
   const handleReply = (tweetId: string) => {
     navigate(`/tweet/${tweetId}`);
   };
@@ -142,13 +146,15 @@ const Tweet = ({ tweet, userId, onTweetUpdated }: TweetProps) => {
       <div id={tweet._id} className="card mb-3 tweet-card">
         <div className="card-body">
           {/* En-tête du tweet (utilisateur et date) */}
-          <div className="d-flex align-items-center mb-3">
+          <div className="d-flex align-items-center mb-3"          >
             <img
               src={tweet.author.profilePicture || 'https://via.placeholder.com/50'}
               alt="Profile"
               className="rounded-circle me-3"
               width="50"
               height="50"
+              onClick={() => handleProfile(tweet.author.username)}
+              style={{ cursor: 'pointer' }}
             />
             <div>
               <h5 className="card-title mb-0 tweet-text">{tweet.author.username}</h5>

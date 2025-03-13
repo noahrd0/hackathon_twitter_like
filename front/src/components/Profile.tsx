@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, Card, Badge } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Tweet from './tweets/Tweet'; // Import the Tweet component
 
 const TwitterLikeProfile = () => {
   const navigate = useNavigate();
+  const { username } = useParams(); // Extract username from URL
   
-  // État pour stocker les données de l'utilisateur
   const [user, setUser] = useState({
     username: '',
     bio: '',
@@ -15,66 +15,84 @@ const TwitterLikeProfile = () => {
     bannerPicture: '',
     followers: [],
     following: [],
+    _id: '', // Store user ID to check if this is the current user's profile
   });
 
-  // État pour stocker les tweets de l'utilisateur
   const [userTweets, setUserTweets] = useState([]);
-
   const [userId, setUserId] = useState(null);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
   
-  // État pour gérer le chargement
   const [loading, setLoading] = useState(true);
   const [tweetsLoading, setTweetsLoading] = useState(true);
 
-  // Fetch user profile data
+  // Get current user ID from token
   useEffect(() => {
     const getUserIdFromToken = () => {
       const token = localStorage.getItem('token');
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUserId(payload.id);
+        return payload.id;
       }
+      return null;
     };
-
+    
+    const currentUserId = getUserIdFromToken();
+    
+    // Fetch user data
     const fetchUserData = async () => {
       try {
-        const response = await fetch('http://localhost:5201/api/users', {
+        const endpoint = username ? `http://localhost:5201/api/users/${username}` : 'http://localhost:5201/api/users';
+
+        const response = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
         });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user profile');
+        }
+        
         const userData = await response.json();
-        console.log(userData);
-
-        // Mettre à jour l'état avec les données de l'utilisateur
+        
+        // Check if this is the current user's profile
+        setIsOwnProfile(currentUserId === userData._id);
+        
+        // Update user state
         setUser({
           username: userData.username,
-          bio: userData.bio,
-          profilePicture: userData.profilePicture,
-          bannerPicture: userData.bannerPicture,
-          followers: userData.followers,
-          following: userData.following,
+          bio: userData.bio || '',
+          profilePicture: userData.profilePicture || '',
+          bannerPicture: userData.bannerPicture || '',
+          followers: userData.followers || [],
+          following: userData.following || [],
+          _id: userData._id,
         });
 
-        setLoading(false); // Fin du chargement
+        setLoading(false);
       } catch (error) {
-        console.error('Erreur lors de la récupération des données:', error);
-        setLoading(false); // Fin du chargement même en cas d'erreur
+        console.error('Error fetching user data:', error);
+        setLoading(false);
       }
     };
 
-    getUserIdFromToken();
     fetchUserData();
-  }, []);
+  }, [username]); // Re-fetch when username changes
 
-  // Fetch user tweets
+  // Fetch tweets for this profile
   useEffect(() => {
     const fetchUserTweets = async () => {
-      console.log('Fetching user tweets...');
+      if (!user._id && !username) return; // Don't fetch if no user data yet
+      
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5201/api/tweets/getuserprofile', {
+        const endpoint = username 
+          ? `http://localhost:5201/api/tweets/getuserprofile/${username}`
+          : 'http://localhost:5201/api/tweets/getuserprofile';
+          
+        const response = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -83,32 +101,33 @@ const TwitterLikeProfile = () => {
         
         if (response.ok) {
           const tweetsData = await response.json();
-          console.log('User tweets:', tweetsData);
           setUserTweets(tweetsData);
         } else {
-          console.error('Erreur lors de la récupération des tweets');
+          console.error('Error fetching tweets');
         }
       } catch (error) {
-        console.error('Erreur lors de la récupération des tweets:', error);
+        console.error('Error fetching tweets:', error);
       } finally {
         setTweetsLoading(false);
       }
     };
 
     fetchUserTweets();
-  }, []);
+  }, [user._id, username]);
 
-  // Function to handle navigation to edit profile page
   const handleEditProfile = () => {
     navigate('/profile/edit');
   };
 
-  // Function to refresh tweets after actions (like, retweet, etc.)
   const refreshTweets = async () => {
     setTweetsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5201/api/tweets/getuserprofile', {
+      const endpoint = username 
+        ? `http://localhost:5201/api/tweets/getuserprofile/${username}`
+        : 'http://localhost:5201/api/tweets/getuserprofile';
+        
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -120,20 +139,19 @@ const TwitterLikeProfile = () => {
         setUserTweets(tweetsData);
       }
     } catch (error) {
-      console.error('Erreur lors de l\'actualisation des tweets:', error);
+      console.error('Error refreshing tweets:', error);
     } finally {
       setTweetsLoading(false);
     }
   };
 
-  // Si les données sont en cours de chargement
   if (loading) {
     return <div className="text-center mt-5">Chargement du profil...</div>;
   }
 
   return (
     <Container fluid className="p-0">
-      {/* Bannière de profil */}
+      {/* Banner */}
       <div
         style={{
           backgroundImage: `url(${user.bannerPicture})`,
@@ -155,11 +173,11 @@ const TwitterLikeProfile = () => {
         ></div>
       </div>
 
-      {/* Section d'informations de profil */}
+      {/* Profile info */}
       <Container>
         <Row className="mt-4">
           <Col>
-            {/* Photo de profil */}
+            {/* Profile picture */}
             <div
               style={{
                 marginTop: '-75px',
@@ -179,25 +197,34 @@ const TwitterLikeProfile = () => {
               />
             </div>
 
-            {/* Bouton Modifier le profil */}
+            {/* Only show Edit button if it's the current user's profile */}
             <div className="d-flex justify-content-end mt-3">
-              <Button 
-                variant="outline-primary" 
-                className="rounded-pill"
-                onClick={handleEditProfile}
-              >
-                Modifier le profil
-              </Button>
+              {isOwnProfile ? (
+                <Button 
+                  variant="outline-primary" 
+                  className="rounded-pill"
+                  onClick={handleEditProfile}
+                >
+                  Modifier le profil
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline-primary" 
+                  className="rounded-pill"
+                >
+                  Suivre
+                </Button>
+              )}
             </div>
 
-            {/* Nom d'utilisateur et bio */}
+            {/* Username and bio */}
             <div className="mt-3">
               <h3 className="fw-bold mb-0">{user.username}</h3>
               <p className="text-muted">@{user.username}</p>
               <p>{user.bio}</p>
             </div>
 
-            {/* Statistiques (abonnements et abonnés) */}
+            {/* Stats */}
             <div className="d-flex gap-3 mt-3 mb-4">
               <div>
                 <span className="fw-bold">{user.following.length}</span>{' '}
@@ -209,7 +236,7 @@ const TwitterLikeProfile = () => {
               </div>
             </div>
 
-            {/* Section des tweets */}
+            {/* Tweets section */}
             <div className="mt-4">
               <h4 className="mb-3">Publications</h4>
               
