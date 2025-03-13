@@ -232,9 +232,67 @@ export const getBookmarks = async (req, res) => {
     const user = await User.findById(decodedToken.id);
 
     try {
-        const tweets = await Tweet.find({ bookmarks: user._id });
+        const tweets = await Tweet.find({ bookmarks: user._id })
+            .populate('author', 'username profilePicture')
+            .populate('mentions', 'username profilePicture')
+            .sort({ timestamp: -1 });
         return res.status(200).json(tweets);
     } catch (error) {
         return res.status(500).json({ message: error.message });
+    }
+}
+
+export const getTweetFromUser = async (req, res) => {
+    if (req.params.id) {
+        try {
+            const tweets = await Tweet.find({
+                $or: [
+                    { author: req.params.id, replyTo: { $exists: false } },
+                    { retweets: req.params.id, replyTo: { $exists: false } }
+                ]
+            })
+                .populate('author', 'username profilePicture')
+                .populate('mentions', 'username profilePicture')
+                .sort({ timestamp: -1 });
+
+            // Remove duplicates where the user has retweeted their own tweet
+            const uniqueTweets = tweets.filter((tweet, index, self) =>
+                index === self.findIndex((t) => (
+                    t._id.toString() === tweet._id.toString()
+                ))
+            );
+
+            return res.status(200).json(uniqueTweets);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
+    } else {
+        try {
+            // Get the User ID from the token
+            const token = req.headers.authorization.split(' ')[1];
+            const decodedToken = decodeToken(token);
+            const user = await User.findById(decodedToken.id);
+
+            const tweets = await Tweet.find({
+                $or: [
+                    { author: user._id, replyTo: { $exists: false } },
+                    { retweets: user._id, replyTo: { $exists: false } }
+                ]
+            })
+                .populate('author', 'username profilePicture')
+                .populate('mentions', 'username profilePicture')
+                .sort({ timestamp: -1 });
+
+            // Remove duplicates where the user has retweeted their own tweet
+            const uniqueTweets = tweets.filter((tweet, index, self) =>
+                index === self.findIndex((t) => (
+                    t._id.toString() === tweet._id.toString()
+                ))
+            );
+
+            return res.status(200).json(uniqueTweets);
+        } catch (error) {
+            return res.status(500).json({ message: error.message });
+        }
     }
 }

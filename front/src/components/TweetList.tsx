@@ -17,6 +17,7 @@ const TweetList = () => {
     video?: string;
     hashtags: string[];
     mentions: string[];
+    bookmarks: string[];
     likes: string[];
     retweets: string[];
     replyTo?: string;

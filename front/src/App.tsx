@@ -5,6 +5,7 @@ import RegisterForm from './components/RegisterForm.tsx';
 import TweetList from './components/TweetList.tsx';
 import TweetDetail from './components/TweetDetails.tsx';
 import Profile from './components/Profile.tsx';
+import ProfileEdit from './components/ProfileEdit.tsx';
 import BookmarksList from './components/BookmarksList.tsx';
 import LogoutButton from './components/LogoutButton.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -420,6 +421,11 @@ function App() {
               <Route path='/profile' element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path='/profile/edit' element={
+                <ProtectedRoute>
+                  <ProfileEdit />
                 </ProtectedRoute>
               } />
               <Route path='/bookmarks' element={

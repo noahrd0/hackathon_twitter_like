@@ -1,4 +1,4 @@
-import { generateToken } from "../config/jwt.js";
+import { generateToken, decodeToken } from "../config/jwt.js";
 import User from "../models/UserModel.js";
 
 export const registerUser = async (req, res) => {
@@ -47,12 +47,12 @@ export const loginUser = async (req, res) => {
 }
 
 export const updateUser = async (req, res) => {
-    if (!req.params.id) {
-        return res.status(400).json({ message: 'Please provide user ID' });
-    }
-
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        // Get the User ID from the token
+        const token = req.headers.authorization.split(' ')[1];
+        const decodedToken = decodeToken(token);
+        
+        const user = await User.findByIdAndUpdate(decodedToken.id, req.body, { new: true });
         return res.status(200).json(user);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -61,10 +61,14 @@ export const updateUser = async (req, res) => {
 
 export const getUser = async (req, res) => {
     if (!req.params.id) {
-        // Show all users
+        // Show connected user
         try {
-            const users = await User.find();
-            return res.status(200).json(users);
+            // Get the User ID from the token
+            const token = req.headers.authorization.split(' ')[1];
+            const decodedToken = decodeToken(token);
+            const user = await User.findById(decodedToken.id);
+
+            return res.status(200).json(user);
         } catch (error) {
             return res.status(500).json({ message: error.message });
         }
