@@ -128,12 +128,11 @@ export const bookmarkTweet = async (req, res) => {
 
 export const getTweet = async (req, res) => {
     if (!req.params.id) {
-        // Show all tweets
+        // Show all tweets with replyTo field empty
         try {
-            const tweets = await Tweet.find()
+            const tweets = await Tweet.find({ replyTo: { $exists: false } })
                 .populate('author', 'username profilePicture')
                 .populate('mentions', 'username profilePicture')
-                .populate('replyTo')
                 .sort({ timestamp: -1 });
             return res.status(200).json(tweets);
         } catch (error) {
@@ -144,8 +143,7 @@ export const getTweet = async (req, res) => {
         try {
             const tweet = await Tweet.findById(req.params.id)
                 .populate('author', 'username profilePicture')
-                .populate('mentions', 'username profilePicture')
-                .populate('replyTo');
+                .populate('mentions', 'username profilePicture');
             return res.status(200).json(tweet);
         } catch (error) {
             return res.status(500).json({ message: error.message });
