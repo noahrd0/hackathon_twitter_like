@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useParams, useLocation, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm.tsx';
 import RegisterForm from './components/RegisterForm.tsx';
@@ -6,6 +6,7 @@ import TweetList from './components/TweetList.tsx';
 import TweetDetail from './components/TweetDetails.tsx';
 import Profile from './components/Profile.tsx';
 import BookmarksList from './components/BookmarksList.tsx';
+import LogoutButton from './components/LogoutButton.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Navbar, Nav, Form, FormControl, Button, Badge } from 'react-bootstrap';
 
@@ -14,7 +15,14 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [anger, setAnger] = useState(0);
   const [joy, setJoy] = useState(0);
   const [sadness, setSadness] = useState(0);
-  const location = useLocation(); // Pour déterminer l'URL actuelle
+  const location = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Vérifier si l'utilisateur est authentifié
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, [location]); // Réexécuter quand l'URL change pour mettre à jour l'état d'authentification
 
   // Fonction pour vérifier si un lien est actif
   const isActive = (path) => {
@@ -247,12 +255,20 @@ function Layout({ children }: { children: React.ReactNode }) {
               )}
             </Button>
             
-            <Button as={Link} to="/login" variant="outline-primary" className="me-2 ipssi-btn-outline">
-              Se connecter
-            </Button>
-            <Button as={Link} to="/register" variant="primary" className="ipssi-btn-primary">
-              S'inscrire
-            </Button>
+            {isAuthenticated ? (
+              // Afficher le bouton de déconnexion si l'utilisateur est authentifié
+              <LogoutButton />
+            ) : (
+              // Afficher les boutons de connexion et d'inscription si l'utilisateur n'est pas authentifié
+              <>
+                <Button as={Link} to="/login" variant="outline-primary" className="me-2 ipssi-btn-outline">
+                  Se connecter
+                </Button>
+                <Button as={Link} to="/register" variant="primary" className="ipssi-btn-primary">
+                  S'inscrire
+                </Button>
+              </>
+            )}
           </div>
         </Navbar.Collapse>
       </Navbar>
@@ -346,7 +362,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               </div>
               <div className="mood-bar">
                 <div className="progress">
-                  <div
+                  <div  
                     className="progress-bar bg-danger"
                     style={{ width: `${anger}%` }}
                     role="progressbar"
@@ -371,6 +387,17 @@ function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Composant pour protéger les routes qui nécessitent une authentification
+function ProtectedRoute({ children }) {
+  const isAuthenticated = !!localStorage.getItem('token');
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -379,12 +406,32 @@ function App() {
           <Layout>
             <Routes>
               <Route path='/login' element={<LoginForm />} />
-              <Route path='/' element={<TweetList />} />
-              <Route path='/tweet/:tweetId' element={<TweetDetail />} />
               <Route path='/register' element={<RegisterForm />} />
-              <Route path='/profile' element={<Profile />} />
-              <Route path='/bookmarks' element={<BookmarksList />} />
-              <Route path='/notifications' element={<div>Page des notifications</div>} />
+              <Route path='/' element={
+                <ProtectedRoute>
+                  <TweetList />
+                </ProtectedRoute>
+              } />
+              <Route path='/tweet/:tweetId' element={
+                <ProtectedRoute>
+                  <TweetDetail />
+                </ProtectedRoute>
+              } />
+              <Route path='/profile' element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } />
+              <Route path='/bookmarks' element={
+                <ProtectedRoute>
+                  <BookmarksList />
+                </ProtectedRoute>
+              } />
+              <Route path='/notifications' element={
+                <ProtectedRoute>
+                  <div>Page des notifications</div>
+                </ProtectedRoute>
+              } />
             </Routes>
           </Layout>
         } />
