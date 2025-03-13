@@ -12,15 +12,14 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    console.log('Email:', email);
-    console.log('Mot de passe:', password);
-    console.log('username:', username);
+    const profilePicture = 'https://upload.wikimedia.org/wikipedia/commons/0/03/Twitter_default_profile_400x400.png'
+    const bannerPicture  = 'https://htmlcolorcodes.com/assets/images/colors/blue-color-solid-background-1920x1080.png'
 
     try {
       const response = await fetch('http://localhost:5201/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, username }),
+        body: JSON.stringify({ email, password, username, profilePicture, bannerPicture }),
       });
 
       const data = await response.json();

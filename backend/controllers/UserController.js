@@ -98,23 +98,23 @@ export const deleteUser = async (req, res) => {
 }
 
 export const followUser = async (req, res) => {
-    if (!req.params.id) {
-        return res.status(400).json({ message: 'Please provide user ID' });
+    if (!req.params.username || !req.body.userId) {
+        return res.status(400).json({ message: 'Please provide username and request body userId' });
     }
 
     try {
-        const user = await User.findById(req.params.id);
+        const user = await User.findOne({ username: req.params.username });
         const currentUser = await User.findById(req.body.userId);
 
         if (!user.followers.includes(req.body.userId)) {
             // Follow
             await user.updateOne({ $push: { followers: req.body.userId } });
-            await currentUser.updateOne({ $push: { following: req.params.id } });
+            await currentUser.updateOne({ $push: { following: user._id } });
             return res.status(200).json({ message: 'User followed' });
         } else {
             // Unfollow
             await user.updateOne({ $pull: { followers: req.body.userId } });
-            await currentUser.updateOne({ $pull: { following: req.params.id } });
+            await currentUser.updateOne({ $pull: { following: user._id } });
             return res.status(200).json({ message: 'User unfollowed' });
         }
     } catch (error) {

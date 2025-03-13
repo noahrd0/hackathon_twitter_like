@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, useParams, useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useParams, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm.tsx';
 import RegisterForm from './components/RegisterForm.tsx';
@@ -8,6 +8,8 @@ import Profile from './components/Profile.tsx';
 import ProfileEdit from './components/ProfileEdit.tsx';
 import BookmarksList from './components/BookmarksList.tsx';
 import LogoutButton from './components/LogoutButton.tsx';
+import SearchResults from './components/SearchTweet.tsx';
+import Notifications from './components/Notifications.tsx';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Navbar, Nav, Form, FormControl, Button, Badge } from 'react-bootstrap';
 
@@ -18,6 +20,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [sadness, setSadness] = useState(0);
   const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
 
   // Vérifier si l'utilisateur est authentifié
   useEffect(() => {
@@ -232,16 +235,23 @@ function Layout({ children }: { children: React.ReactNode }) {
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Form className="d-flex mx-auto">
-            <FormControl 
-              type="search" 
-              placeholder="Rechercher sur IPSSI" 
-              className="me-2 ipssi-search" 
-            />
-            <Button variant="outline-primary" className="ipssi-btn-outline rounded-circle">
-              <i className="bi bi-search"></i>
-            </Button>
-          </Form>
+        <Form className="d-flex mx-auto" onSubmit={(e) => {
+          e.preventDefault();
+          const input = e.currentTarget.querySelector('input');
+          const term = input?.value?.trim();
+          if (term) {
+            navigate(`/search/${encodeURIComponent(term)}`);
+          }
+        }}>
+          <FormControl 
+            type="search" 
+            placeholder="Rechercher sur IPSSI" 
+            className="me-2 ipssi-search" 
+          />
+          <Button variant="outline-primary" type="submit" className="ipssi-btn-outline rounded-circle">
+            <i className="bi bi-search"></i>
+          </Button>
+        </Form>
           <div className="d-flex align-items-center">
             <Button 
               variant="link" 
@@ -283,7 +293,6 @@ function Layout({ children }: { children: React.ReactNode }) {
               </Nav.Link>
               <Nav.Link as={Link} to="/notifications" className={`mb-2 ${isActive('/notifications') ? 'active' : ''}`}>
                 <i className={`bi ${isActive('/notifications') ? 'bi-bell-fill' : 'bi-bell'} ipssi-icon`}></i> Notifications
-                <Badge bg="danger" className="ms-2">5</Badge>
               </Nav.Link>
               <Nav.Link as={Link} to="/bookmarks" className={`mb-2 ${isActive('/bookmarks') ? 'active' : ''}`}>
                 <i className={`bi ${isActive('/bookmarks') ? 'bi-bookmark-fill' : 'bi-bookmark'} ipssi-icon`}></i> Signets
@@ -418,6 +427,11 @@ function App() {
                   <TweetDetail />
                 </ProtectedRoute>
               } />
+              <Route path='/search/:searchQuery' element={
+                <ProtectedRoute>
+                  <SearchResults />
+                </ProtectedRoute>
+              } />
               <Route path='/profile' element={
                 <ProtectedRoute>
                   <Profile />
@@ -440,7 +454,7 @@ function App() {
               } />
               <Route path='/notifications' element={
                 <ProtectedRoute>
-                  <div>Page des notifications</div>
+                  <Notifications />
                 </ProtectedRoute>
               } />
             </Routes>

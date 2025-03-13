@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Card, Badge } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Tweet from './tweets/Tweet'; // Import the Tweet component
@@ -21,6 +21,7 @@ const TwitterLikeProfile = () => {
   const [userTweets, setUserTweets] = useState([]);
   const [userId, setUserId] = useState(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
   
   const [loading, setLoading] = useState(true);
   const [tweetsLoading, setTweetsLoading] = useState(true);
@@ -60,6 +61,9 @@ const TwitterLikeProfile = () => {
         // Check if this is the current user's profile
         setIsOwnProfile(currentUserId === userData._id);
         
+        // Check if current user is following this profile
+        setIsFollowing(userData.followers.includes(currentUserId));
+        
         // Update user state
         setUser({
           username: userData.username,
@@ -80,6 +84,41 @@ const TwitterLikeProfile = () => {
 
     fetchUserData();
   }, [username]); // Re-fetch when username changes
+
+  // Handle follow/unfollow function
+  const handleFollowToggle = async () => {
+    console.log("Handle follow toggle");
+    if (!userId || !username) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5201/api/users/follow/${username}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId })
+      });
+
+      if (response.ok) {
+        // Toggle the following state locally
+        setIsFollowing(!isFollowing);
+        
+        // Update followers count
+        setUser(prevUser => ({
+          ...prevUser,
+          followers: isFollowing 
+            ? prevUser.followers.filter(id => id !== userId) // Remove current user from followers
+            : [...prevUser.followers, userId] // Add current user to followers
+        }));
+      } else {
+        console.error('Failed to follow/unfollow user');
+      }
+    } catch (error) {
+      console.error('Error following/unfollowing user:', error);
+    }
+  };
 
   // Fetch tweets for this profile
   useEffect(() => {
@@ -209,10 +248,11 @@ const TwitterLikeProfile = () => {
                 </Button>
               ) : (
                 <Button 
-                  variant="outline-primary" 
+                  variant={isFollowing ? "outline-danger" : "outline-primary"}
                   className="rounded-pill"
+                  onClick={handleFollowToggle}
                 >
-                  Suivre
+                  {isFollowing ? "Ne plus suivre" : "Suivre"}
                 </Button>
               )}
             </div>

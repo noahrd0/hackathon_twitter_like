@@ -17,6 +17,6 @@ router.put('/update', authMiddleware, updateUser);
 router.get('/:username', authMiddleware, getUser);
 router.get('/', authMiddleware, getUser);
 router.delete('/:id', authMiddleware, deleteUser);
-router.put('/follow/:id', authMiddleware, followUser);
+router.put('/follow/:username', authMiddleware, followUser);
 
 export default router;

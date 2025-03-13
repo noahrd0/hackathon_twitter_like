@@ -218,7 +218,11 @@ export const getReplies = async (req, res) => {
     }
 
     try {
-        const tweets = await Tweet.find({ replyTo: req.params.id });
+        const tweets = await Tweet.find({ replyTo: req.params.id })
+            .populate('author', 'username profilePicture')
+            .populate('mentions', 'username profilePicture')
+            .sort({ timestamp: -1 });
+
         return res.status(200).json(tweets);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -293,5 +297,84 @@ export const getTweetFromUser = async (req, res) => {
         } catch (error) {
             return res.status(500).json({ message: error.message });
         }
+    }
+}
+
+export const searchTweet = async (req, res) => {
+    if (!req.params.searchTerm) {
+        return res.status(400).json({ message: 'Please provide a search term' });
+    }
+
+    try {
+        const tweets = await Tweet.find({ content: { $regex: req.params.searchTerm, $options: 'i' } })
+            .populate('author', 'username profilePicture')
+            .populate('mentions', 'username profilePicture')
+            .sort({ timestamp: -1 });
+        return res.status(200).json(tweets);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+export const getUserNotifications = async (req, res) => {
+    // Get the User ID from the token
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = decodeToken(token);
+    const user = await User.findById(decodedToken.id);
+
+    try {
+        // Find all tweets authored by the user
+        const userTweets = await Tweet.find({ author: user._id })
+            .populate('likes', 'username profilePicture')
+            .populate('retweets', 'username profilePicture')
+            .populate('author', 'username profilePicture')
+            .lean(); // Use lean for better performance
+        
+        // Transform the data into notifications format
+        const notifications = [];
+        
+        // Process each tweet to extract notifications
+        userTweets.forEach(tweet => {
+            // Add like notifications - one per like
+            tweet.likes.forEach(liker => {
+                // Don't create notification if user liked their own tweet
+                if (liker._id.toString() !== user._id.toString()) {
+                    notifications.push({
+                        type: 'like',
+                        user: liker,
+                        tweet: {
+                            _id: tweet._id,
+                            content: tweet.content,
+                            timestamp: tweet.timestamp
+                        },
+                        timestamp: tweet.timestamp // Using tweet timestamp as approximation
+                    });
+                }
+            });
+            
+            // Add retweet notifications - one per retweet
+            tweet.retweets.forEach(retweeter => {
+                // Don't create notification if user retweeted their own tweet
+                if (retweeter._id.toString() !== user._id.toString()) {
+                    notifications.push({
+                        type: 'retweet',
+                        user: retweeter,
+                        tweet: {
+                            _id: tweet._id,
+                            content: tweet.content,
+                            timestamp: tweet.timestamp
+                        },
+                        timestamp: tweet.timestamp // Using tweet timestamp as approximation
+                    });
+                }
+            });
+        });
+        
+        // Sort notifications by timestamp (newest first)
+        notifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        return res.status(200).json(notifications);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
     }
 }
