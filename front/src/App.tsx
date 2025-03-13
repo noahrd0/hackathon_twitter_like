@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import LoginForm from './components/LoginForm.tsx';
 import RegisterForm from './components/RegisterForm.tsx';
@@ -10,10 +10,31 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Container, Row, Col, Navbar, Nav, Form, FormControl, Button, Badge } from 'react-bootstrap';
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('light');
   const [anger, setAnger] = useState(0);
   const [joy, setJoy] = useState(0);
   const [sadness, setSadness] = useState(0);
+  const location = useLocation(); // Pour déterminer l'URL actuelle
+
+  // Fonction pour vérifier si un lien est actif
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  // Fonction pour obtenir le titre de la page
+  const getPageTitle = () => {
+    switch(location.pathname) {
+      case '/': return 'Accueil';
+      case '/notifications': return 'Notifications';
+      case '/bookmarks': return 'Signets';
+      case '/profile': return 'Profil';
+      case '/login': return 'Connexion';
+      case '/register': return 'Inscription';
+      default: 
+        if (location.pathname.startsWith('/tweet/')) return 'Tweet';
+        return 'Accueil';
+    }
+  };
 
   // Fonction pour générer des émotions aléatoires
   const generateEmotions = () => {
@@ -120,6 +141,16 @@ function Layout({ children }: { children: React.ReactNode }) {
     
     .ipssi-sidebar .nav-link:hover {
       background-color: rgba(29, 161, 242, 0.1);
+    }
+    
+    .ipssi-sidebar .nav-link.active {
+      color: var(--ipssi-highlight);
+      background-color: rgba(29, 161, 242, 0.1);
+      font-weight: bold;
+    }
+    
+    .ipssi-sidebar .nav-link.active i {
+      color: var(--ipssi-highlight);
     }
     
     .ipssi-main {
@@ -230,25 +261,25 @@ function Layout({ children }: { children: React.ReactNode }) {
         <Row>
           <Col md={2} className="ipssi-sidebar vh-100 p-4">
             <Nav className="flex-column">
-              <Nav.Link as={Link} to="/" className="mb-2">
-                <i className="bi bi-house-door-fill ipssi-icon"></i> Accueil
+              <Nav.Link as={Link} to="/" className={`mb-2 ${isActive('/') ? 'active' : ''}`}>
+                <i className={`bi ${isActive('/') ? 'bi-house-door-fill' : 'bi-house-door'} ipssi-icon`}></i> Accueil
               </Nav.Link>
-              <Nav.Link as={Link} to="/notifications" className="mb-2">
-                <i className="bi bi-bell ipssi-icon"></i> Notifications
+              <Nav.Link as={Link} to="/notifications" className={`mb-2 ${isActive('/notifications') ? 'active' : ''}`}>
+                <i className={`bi ${isActive('/notifications') ? 'bi-bell-fill' : 'bi-bell'} ipssi-icon`}></i> Notifications
                 <Badge bg="danger" className="ms-2">5</Badge>
               </Nav.Link>
-              <Nav.Link as={Link} to="/bookmarks" className="mb-2">
-                <i className="bi bi-bookmark ipssi-icon"></i> Signets
+              <Nav.Link as={Link} to="/bookmarks" className={`mb-2 ${isActive('/bookmarks') ? 'active' : ''}`}>
+                <i className={`bi ${isActive('/bookmarks') ? 'bi-bookmark-fill' : 'bi-bookmark'} ipssi-icon`}></i> Signets
               </Nav.Link>
-              <Nav.Link as={Link} to="/profile" className="mb-2">
-                <i className="bi bi-person ipssi-icon"></i> Profil
+              <Nav.Link as={Link} to="/profile" className={`mb-2 ${isActive('/profile') ? 'active' : ''}`}>
+                <i className={`bi ${isActive('/profile') ? 'bi-person-fill' : 'bi-person'} ipssi-icon`}></i> Profil
               </Nav.Link>
             </Nav>
           </Col>
           
           <Col md={8} className="ipssi-main p-0">
             <div className="border-bottom p-3">
-              <h5 className="mb-0 fw-bold">Accueil</h5>
+              <h5 className="mb-0 fw-bold">{getPageTitle()}</h5>
             </div>
             <div className="p-3">
               {children}
@@ -343,16 +374,21 @@ function Layout({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path='/login' element={<LoginForm />} />
-          <Route path='/' element={<TweetList />} />
-          <Route path='/tweet/:tweetId' element={<TweetDetail tweetId={useParams().tweetId} />} />
-          <Route path='/register' element={<RegisterForm />} />
-          <Route path='/profile' element={<Profile />} />
-          <Route path='/bookmarks' element={<BookmarksList />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="*" element={
+          <Layout>
+            <Routes>
+              <Route path='/login' element={<LoginForm />} />
+              <Route path='/' element={<TweetList />} />
+              <Route path='/tweet/:tweetId' element={<TweetDetail />} />
+              <Route path='/register' element={<RegisterForm />} />
+              <Route path='/profile' element={<Profile />} />
+              <Route path='/bookmarks' element={<BookmarksList />} />
+              <Route path='/notifications' element={<div>Page des notifications</div>} />
+            </Routes>
+          </Layout>
+        } />
+      </Routes>
     </BrowserRouter>
   );
 }

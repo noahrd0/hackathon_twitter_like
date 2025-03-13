@@ -1,21 +1,9 @@
-/* styles.css */
 :root {
   --ipssi-blue: #15202b;
   --ipssi-light-blue: #1DA1F2;
   --ipssi-text: #ffffff;
   --ipssi-border: #38444d;
   --ipssi-bg: #192734;
-}
-
-/* Thème sombre (par défaut) */
-.theme-dark {
-  --ipssi-bg-primary: #15202b;
-  --ipssi-bg-secondary: #192734;
-  --ipssi-text-primary: #ffffff;
-  --ipssi-text-secondary: #8899a6;
-  --ipssi-border-color: #38444d;
-  --ipssi-highlight: #1DA1F2;
-  --ipssi-card-bg: #22303c;
 }
 
 /* Thème clair */
@@ -27,6 +15,17 @@
   --ipssi-border-color: #e1e8ed;
   --ipssi-highlight: #1DA1F2;
   --ipssi-card-bg: #ffffff;
+}
+
+/* Thème sombre */
+.theme-dark {
+  --ipssi-bg-primary: #15202b;
+  --ipssi-bg-secondary: #192734;
+  --ipssi-text-primary: #ffffff;
+  --ipssi-text-secondary: #8899a6;
+  --ipssi-border-color: #38444d;
+  --ipssi-highlight: #1DA1F2;
+  --ipssi-card-bg: #22303c;
 }
 
 body {
@@ -73,6 +72,17 @@ body {
 
 .ipssi-sidebar .nav-link:hover {
   background-color: rgba(29, 161, 242, 0.1);
+}
+
+/* Nouveau style pour les liens actifs */
+.ipssi-sidebar .nav-link.active {
+  color: var(--ipssi-highlight);
+  background-color: rgba(29, 161, 242, 0.1);
+  font-weight: bold;
+}
+
+.ipssi-sidebar .nav-link.active i {
+  color: var(--ipssi-highlight);
 }
 
 .ipssi-main {
